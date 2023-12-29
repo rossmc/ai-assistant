@@ -1,0 +1,24 @@
+{
+    "name": "@rossmc/ai-assistant",
+    "type": "module",
+    "description": "A custom CLI AI assistant made in Node.js with the OpenAI API",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "bin": {
+        "ask": "./index.js"
+    },
+    "dependencies": {
+        "@clack/prompts": "^0.2.0",
+        "dotenv": "^16.3.1",
+        "marked": "^11.1.0",
+        "marked-terminal": "^6.2.0",
+        "minimist": "^1.2.8",
+        "openai": "^4.24.1",
+        "picocolors": "^1.0.0",
+        "terminal-link": "^3.0.0"
+    },
+    "engines": {
+        "node": "18.19"
+    }
+}
