@@ -33,6 +33,12 @@ A custom CLI AI assistant made in Node.js with the OpenAI API.
 
 ## Chat History
 Chat history is saved to the `./history` directory. Each conversation is saved in a separate file. The file name is the date and time the conversation ended.
+
+The last text chat is automatically loaded when the CLI is started. To start a new chat, use the `--new` or `-n` flag:
+```bash
+ask -n
+```
+
 To clear the chat history, delete all files in the history directory.
 ```
 rm -rf ./history/*

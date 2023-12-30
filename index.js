@@ -23,9 +23,17 @@ import { markedTerminal } from 'marked-terminal';
 class Assistant {
     textMsg = `${color.bold("Ask")} a question or hit enter to quit:`;
     imageMsg = `Enter a ${color.bold("prompt")} to generate an image or hit enter to quit`;
+    lastChatLoaded = false;
 
     constructor() {
         this.currentModuleDir = path.dirname(new URL(import.meta.url).pathname);
+        this.historyDir = path.resolve(this.currentModuleDir, `history`);
+        this.historyTextPath = path.resolve(this.historyDir, 'text');
+        this.historyImagePath = path.resolve(this.historyDir, 'image');
+        this.lastTextFileSavedReferencePath = path.resolve(this.historyTextPath, 'last-file-saved-reference.json');
+
+        this.lastTextFileSavedPath = fs.existsSync(this.lastTextFileSavedReferencePath) ? JSON.parse(fs.readFileSync(this.lastTextFileSavedReferencePath))?.filePath : null;
+
         const envPath = path.resolve(this.currentModuleDir, '.env');
         dotenv.config({ path: envPath });
 
@@ -36,9 +44,12 @@ class Assistant {
     }
 
     async run() {
+        let lastChat = null;
+
         intro(color.inverse(" Your Terminal AI Assistant 🤖 "));
+
         if (this.args.help || this.args.h) {
-            this.exit();
+            this.exit(false);
         }
 
         if (this.args.image || this.args.i) {
@@ -51,15 +62,24 @@ class Assistant {
 
         if (this.oaiStore.get('modelType') === 'image') { // we always ask user to configure image assistant when image is selected
             await this.configureImageAssistant();
+        } else if (this.lastTextFileSavedPath && !this.args.new && !this.args.n && !this.args.config && !this.args.c) {
+            lastChat = await this.getLastChat();
         }
 
+        if (lastChat) this.oaiStore.config = lastChat.config;
+
         this.oaiChat = new OpenAIChat(this.oaiStore.config);
+
+        if (lastChat) {
+            this.oaiChat.messages = lastChat.history;
+            this.loadChatHistory(lastChat.history);
+        }
 
         this.question();
     }
 
     async configureAssistant() {
-        intro(`${color.bold("Configure")} your assistant for next session:\n${color.dim("   Persistent settings are added to your .env file.")}\n`);
+        intro(`${color.bold("Configure")} your assistant for next session:\n${color.dim("   Settings are usually loaded from your .env file.")}\n`);
 
         this.oaiStore.set(
             'modelType',
@@ -209,6 +229,7 @@ class Assistant {
         }
         msg += `\nAvailable flags:`;
         msg += `\n${color.bold("--help or -h")}          show this help message`;
+        msg += `\n${color.bold("--new or -n")}           ask a new question, without loading the last chat history`;
         msg += `\n${color.bold("--config or -c")}        configure assistant for next session`;
         msg += `\n${color.bold("--image or -i")}         create an image`;
         msg += `\n`;
@@ -217,9 +238,9 @@ class Assistant {
         return msg;
     }
 
-    exit() {
+    exit(save = true) {
         cancel();
-        outro(this.goodbyeMessage(this.saveChat()));
+        outro(this.goodbyeMessage(save ? this.saveChat() : false));
         process.exit(0);
     }
 
@@ -238,12 +259,11 @@ class Assistant {
             history: modelType === 'image' ? imageHistory : textHistory,
         }
 
-        const historyDir = path.resolve(this.currentModuleDir, `history`);
-        const directoryPath = path.resolve(historyDir, modelType);
-
-        if (!fs.existsSync(historyDir)) {
-            fs.mkdirSync(historyDir);
+        if (!fs.existsSync(this.historyDir)) {
+            fs.mkdirSync(this.historyDir);
         }
+
+        const directoryPath = modelType === 'image' ? this.historyImagePath : this.historyTextPath;
 
         if (!fs.existsSync(directoryPath)) {
             fs.mkdirSync(directoryPath);
@@ -255,12 +275,47 @@ class Assistant {
 
         try {
             fs.writeFileSync(filePath, jsonString);
+
+            if(this.lastChatLoaded) {
+                fs.unlinkSync(this.lastTextFileSavedPath);
+            }
+
+            if (modelType === 'text') {
+                fs.writeFileSync(this.lastTextFileSavedReferencePath, JSON.stringify({filePath: filePath}, null, 2));
+            }
+
             responseMessage = `History saved to file: ${filePath}`;
         } catch (error) {
             responseMessage = `Error saving history to file: ${error.message}`
         }
 
         return responseMessage;
+    }
+
+    async getLastChat() {
+        try {
+            return JSON.parse(fs.readFileSync(this.lastTextFileSavedPath));
+        } catch (error) {
+            console.log(`Error reading last chat file: ${error.message}`);
+            return null;
+        }
+    }
+
+    loadChatHistory(history = null) {
+        if (!history) return;
+
+        console.log(`\n${color.underline(color.bold("Chat History"))}\n`);
+
+        history.forEach((message) => {
+            if (message.role !== 'system') {
+                console.log(`${color.bold("Role:")} ${message.role}`);
+                console.log(`${color.bold("Message:")} ${marked(message.content)}`);
+            }
+        });
+
+        console.log(`${color.dim('To ask a new question run the ask command with the -n flag, ask -n ')}`);
+
+        this.lastChatLoaded = true;
     }
 }
 
