@@ -48,6 +48,11 @@ class Assistant {
 
         intro(color.inverse(" Your Terminal AI Assistant 🤖 "));
 
+        if (this.args.delete || this.args.d) {
+            this.deleteHistory();
+            this.exit(false);
+        }
+
         if (this.args.help || this.args.h) {
             this.exit(false);
         }
@@ -232,6 +237,7 @@ class Assistant {
         msg += `\n${color.bold("--new or -n")}           ask a new question, without loading the last chat history`;
         msg += `\n${color.bold("--config or -c")}        configure assistant for next session`;
         msg += `\n${color.bold("--image or -i")}         create an image`;
+        msg += `\n${color.bold("--delete or -d")}        delete chat history`;
         msg += `\n`;
         msg += `\n${color.inverse(" Good Bye ")} 👋🏻`;
         
@@ -316,6 +322,12 @@ class Assistant {
         console.log(`${color.dim('To ask a new question run the ask command with the -n flag, ask -n ')}`);
 
         this.lastChatLoaded = true;
+    }
+
+    deleteHistory () {
+        if (fs.existsSync(this.historyDir)) {
+            fs.rmdirSync(this.historyDir, { recursive: true });
+        }
     }
 }
 

@@ -41,5 +41,5 @@ ask -n
 
 To clear the chat history, delete all files in the history directory.
 ```
-rm -rf ./history/*
+ask -d
 ```
