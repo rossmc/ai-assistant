@@ -3,7 +3,7 @@ A custom CLI AI assistant made in Node.js with the OpenAI API.
 
 ## Installation & Usage
 1. Create an [OpenAI account](https://platform.openai.com/signup) or [sign in](https://platform.openai.com/login).
-2. Navigate to the [API key page](https://platform.openai.com/account/api-keys) and "Create new secret key". Save it securely; do not share it.
+2. Navigate to the [API key page](https://platform.openai.com/account/api-keys) and "Create new secret key".
 3. Create an .env file in the root directory:
     ```bash
     cp .env.example .env
