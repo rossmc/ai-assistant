@@ -22,6 +22,8 @@ A custom CLI AI assistant made in Node.js with the OpenAI API.
 
 6. To install and use the CLI globally:
     ```bash
+    npm install
+    
     npm install -g .
     # or
     sudo npm install -g .
@@ -30,6 +32,11 @@ A custom CLI AI assistant made in Node.js with the OpenAI API.
     Then run the tool in your terminal from anywhere with the `ask` command.    
     <img src="./assets/screen-shot.png" width="400">
 
+## Removing Globally
+If you installed the CLI globally, run the following command to remove it from your system:
+```bash
+npm uninstall -g @rossmc/ai-assistant
+```
 
 ## Chat History
 Chat history is saved to the `./history` directory. Each conversation is saved in a separate file. The file name is the date and time the conversation ended.
