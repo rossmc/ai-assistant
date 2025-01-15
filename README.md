@@ -1,4 +1,4 @@
-# General 
+# General
 A custom CLI AI assistant made in Node.js with the OpenAI API.
 
 ## Installation & Usage
