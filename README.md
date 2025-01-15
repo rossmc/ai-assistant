@@ -1,4 +1,4 @@
-# General
+# General 
 A custom CLI AI assistant made in Node.js with the OpenAI API.
 
 ## Installation & Usage
@@ -23,7 +23,7 @@ A custom CLI AI assistant made in Node.js with the OpenAI API.
 6. To install and use the CLI globally:
     ```bash
     npm install
-    
+
     npm install -g .
     # or
     sudo npm install -g .
